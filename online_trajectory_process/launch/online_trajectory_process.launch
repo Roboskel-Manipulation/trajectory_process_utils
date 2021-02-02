@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="case_raw" default="false"/>
+	<arg name="case_bezier" default="false"/>
+	<arg name="case_downsampling" default="false"/>
+
+	<!-- Raw openpose points -->
+	<group if="$(arg case_raw)">
+		<node name="raw_points_process" type="raw_points_process.py" pkg="online_trajectory_process" respawn="false" output="log">
+			<rosparam file="$(find online_trajectory_process)/config/online_trajectory_process.yaml" command="load"/>
+		</node>
+	</group>
+ 
+	<!-- Piecewise Bezier points -->
+	<group if="$(arg case_bezier)">
+		 <node name="piecewise_bezier_constructor" type="piecewise_bezier_process.py" pkg="online_trajectory_process" respawn="false" output="screen">
+			<rosparam file="$(find online_trajectory_process)/config/online_trajectory_process.yaml" command="load"/>
+		</node> 
+		
+		<include file="$(find trajectory_smoothing)/launch/trajectory_smoothing.launch">
+		</include>
+	</group>
+
+	<!-- Downsampling-Interpolation points -->
+	<group if="$(arg case_downsampling)">		
+		<node name="downsampling_interpolation_constructor" type="downsampling_interpolation_process.py" pkg="online_trajectory_process" respawn="false" output="screen">
+			<rosparam file="$(find online_trajectory_process)/config/online_trajectory_process.yaml" command="load"/>
+		</node>
+	</group>
+</launch>

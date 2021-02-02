@@ -1,0 +1,5 @@
+# length of sliding window for motion detection
+num_points_std: 25
+
+# std threshold for motion detection
+std_threshold: 0.01
