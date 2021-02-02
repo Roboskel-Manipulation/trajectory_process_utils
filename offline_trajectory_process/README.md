@@ -1,5 +1,5 @@
 # The offline trajectory process package
-A ROS package for human movement detection and extra filtering of static points at the onset and end of the movement.
+A ROS package for detecting the onset and end of a human movement. Optionally, filtering of static points at the beginning and end of the trajectory and smoothing of the entire movement is also available.
 
 ## Description
 
