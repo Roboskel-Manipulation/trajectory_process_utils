@@ -7,7 +7,20 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   geometry_msgs
   trajectory_custom_msgs
-  trajectory_process_utils_srvs
+  message_generation
+)
+
+add_service_files(
+  FILES
+	Filtering.srv
+)
+
+generate_messages(
+	DEPENDENCIES
+)
+
+catkin_package(
+	CATKIN_DEPENDS message_generation roscpp rospy
 )
 
 include_directories(

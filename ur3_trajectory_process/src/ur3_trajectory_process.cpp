@@ -7,6 +7,7 @@ extern void compute_new_offset (const geometry_msgs::PointStamped::ConstPtr new_
 
 void halt_motion_callback(const std_msgs::Bool::ConstPtr halt_motion_msg){
 	halt_motion = halt_motion_msg->data;
+	halt_motion = false;
 }
 
 void ee_state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr state_msg){

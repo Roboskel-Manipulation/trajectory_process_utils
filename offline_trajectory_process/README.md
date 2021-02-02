@@ -1,29 +1,25 @@
 # The offline trajectory process package
-
-A ROS package for offline trajectory processing
+A ROS package for human movement detection and extra filtering of static points at the onset and end of the movement.
 
 ## Description
-* `trajectory_smoothing_server.py`: A server for smoothing a trajectory using Bezier curves. It accepts three vectors containing the x, y, z coordinates in the form of a
-service request and returns the corresponding Bezier curve in the form of a service response. The declaration of the services are [here]()
-* `static_points_filtering_server.py`: A server for removing points from the end of a recorded movement which correspond to station. It accepts three vectors containing the x, y, z coordinates in the form of a
-service request and returns the corresponding cleaned trajectory in the form of a service response. The declaration of the services are [here]()
-* `movement_detection.py`: A script containing the complete pipeline for movement detection and movement preprocessing
-  * movement detection: The detection of the movement is based on the standard deviation of the x, y and z coordinates. Using a sliding window of length N, is the
-  standard deviation of at least one coordinate is greater than a predefined threshold, then we assume that the motion has started. The same criterion is used for
-  the detection of the end of the motion. In the meantime, outliers are removed. Outliers are considered NaN values of values which correspond to erroneous measurements.
-  Erroneous points are supposed to be points whose distance from the last valid point is greater than a predetermined threshold.
-  * movement preprocessing: Once the movement has been obtained, a call to the `static_points_filtering_server` is made to get rid of redundant points at the end of the
-  motion. After that a call to the `trajectory_smoothing_server` is made to smooth the trajectory.
 
-In the following plot, blue points correspond to all the recorded points, orange to the final filtered trajectory before passing it to the `trajectory_smoothing_server`
-red to the points indicating the start of the motion and green the points filtered by the `static_points_filtering_server`
+Given an input of 3D human joint positions (e.g. as recorded by [OpenPose](https://github.com/Roboskel-Manipulation/openpose_3D_localization), this package offers the following functionalities:
+* Detection of the onset and end of the human movement
+* Check for invalid positions or movements
+* Filtering of redundant static points from the beginning and end of the movement 
 
-<img src="https://github.com/ThanasisTs/trajectory_process_utils/blob/master/offline_trajectory_process/md_z_n.png" width="1000" height="600">
+NOTE: We use this package to provide to a UR3 cobot human instructed cartesian trajectories. 
+## Functionality
+* movement_detection.py: A node that detects, filters a dynamic movement.
+	* movement detection: The detection of the movement onset is based on the standard deviation of the x, y and z coordinates. Using a sliding window of length N (movement_detection.yaml), if the standard deviation of at least one coordinate is greater than a predefined threshold, then we assume that the motion has started. The same criterion is used for the detection of the end of the motion. In the meantime, outliers are removed. Outliers are considered NaN values and values which correspond to erroneous measurements (points whose distance from the last valid point is greater than a predetermined threshold). If more than XX consecutive points satisfy the above condition the movement is considered invalid.
+	*(optional) extra movement filtering: static_points_filtering_server (see below) is called to further clean the end of the movement.
+	*(optional) movement smoothing: trajectory_smoothing_server is called to smooth the trajectory.
+* static_points_filtering_server.py: A server for removing static redundant points from the beginning and the end of a recorded trajectory using the deviation from the median of an increased length window starting with N points (static_point_filtering.yaml).  It accepts three vectors containing the x, y, z coordinates in the form of a service request and returns the corresponding cleaned trajectory in the form of a service response. The declaration of the services are here.
 
-In the following plot, orange points correspond to the raw final filtered trajectory and blue to the smoothed trajectory produced by the `trajectory_smoothing_server`
+## Launch files
+To check the functionality real-time:
+* Launch ...
 
-<img src="https://github.com/ThanasisTs/trajectory_process_utils/blob/master/offline_trajectory_process/raw_smooth.png" width="1000">
-
-In the following figure, a block diagram of the whole pipeline implemented in `movement_detection.py` is shown
-
-<img src="https://github.com/ThanasisTs/trajectory_process_utils/blob/master/offline_trajectory_process/block_diagram.png" width="500">
+* The arguments of the launch file are the following:
+	*smooth: True if you want to smooth the trajectory (default false)
+	*clean: True if you want to remove redundant points (default true)
