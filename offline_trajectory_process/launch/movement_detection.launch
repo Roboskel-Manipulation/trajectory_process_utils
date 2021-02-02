@@ -9,4 +9,10 @@
 		<rosparam file="$(find offline_trajectory_process)/config/movement_detection.yaml" command="load"/>
 	</node>
 
+	<include file="$(find offline_trajectory_process)/launch/static_point_filtering.launch" if="$(arg filter)">
+	</include>
+
+	<include file="$(find offline_trajectory_process)/launch/trajectory_smoothing.launch" if="$(arg smooth)">
+	</include>
+
 </launch>
