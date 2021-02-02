@@ -1,5 +1,5 @@
 # The online trajectory process package
-A ROS package for online human movement detection and optionally smoothing of the ongoing human movement. 
+A ROS package for human movement onset detection and optionally smoothing of the ongoing movement. 
 
 ## Description
 Given an input of 3D human joint positions (e.g. as recorded by [reference to Openpose_utils)], this package offers the following functionalities:
