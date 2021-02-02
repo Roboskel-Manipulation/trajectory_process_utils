@@ -3,7 +3,7 @@ A ROS package for human movement detection and extra filtering of static points 
 
 ## Description
 
-Given an input of 3D human joint positions (e.g. as recorded by [OpenPose](https://github.com/Roboskel-Manipulation/openpose_3D_localization), this package offers the following functionalities:
+Given an input of 3D human joint positions (e.g. as recorded by [OpenPose](https://github.com/Roboskel-Manipulation/openpose_3D_localization)), this package offers the following functionalities:
 * Detection of the onset and end of the human movement
 * Check for invalid positions or movements
 * Filtering of redundant static points from the beginning and end of the movement 
@@ -23,5 +23,5 @@ To check the functionality real-time:
 	* `roslaunch offline_trajectory_process movement_detection.launch`: Launch the movement_detection node
 
 * The arguments of the `movement_detection.launch` file are the following:
-	*smooth: True if you want to smooth the trajectory (default false)
-	*clean: True if you want to remove redundant points (default true)
+	* smooth: True if you want to smooth the trajectory (default false)
+	* clean: True if you want to remove redundant points (default true)
