@@ -1,5 +1,14 @@
+# length of sliding window for motion detection
 num_points_std: 24
+
+# std threshold for detecting the beginning and the end of the motion
 std_threshold: 0.01
+
+# number of consecutive outliers in order for a movement to be considered invalid
 num_outliers: 10
+
+# service name for smoothing
 smooth_service_name: "trajectory_smoothing"
+
+# service name for filtering
 filter_service_name: "static_points_filtering"
