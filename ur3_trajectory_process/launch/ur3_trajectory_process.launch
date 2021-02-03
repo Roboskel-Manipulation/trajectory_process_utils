@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="halt_motion" default=true/>
+	<arg name="halt_motion" default='true'/>
 
 	<node name="ur3_trajectory_process_node" type="ur3_trajectory_process" pkg="ur3_trajectory_process" respawn="false" output="screen">
 		<rosparam file="$(find ur3_trajectory_process)/config/ur3_trajectory_process.yaml"/>
