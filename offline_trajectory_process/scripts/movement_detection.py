@@ -21,8 +21,11 @@ invalid_movement = False
 num_outliers, num_points_std, std_threshold = None, None, None
 timenow = None
 times = []
+outlier_dis = None
+
 def callback(data, args):
-	global timenow, xRaw, yRaw, zRaw, x, y, z, t, xV_tmp, yV_tmp, zV_tmp, tV_tmp, movement_start, movement_end, count, movement_recording, outliers_count, invalid_movement, num_points_std, std_threshold, num_outliers
+	global timenow, xRaw, yRaw, zRaw, x, y, z, t, xV_tmp, yV_tmp, zV_tmp, tV_tmp, movement_start, movement_end, outlier_dis
+	global count, movement_recording, outliers_count, invalid_movement, num_points_std, std_threshold, num_outliers
 	if movement_recording:
 
 		# Comment this block of code if not using input of type geometry_msgs/Point 
@@ -48,7 +51,7 @@ def callback(data, args):
 				count += 1
 				break
 		if x_tmp != 0 and y_tmp != 0 and z_tmp != 0:
-			if len(xRaw) == 0 or (len(xRaw) >= 1 and abs(xRaw[-1] - x_tmp) < 0.1 and abs(yRaw[-1] - y_tmp) < 0.1 and abs(zRaw[-1] - z_tmp) < 0.1):
+			if len(xRaw) == 0 or (len(xRaw) >= 1 and abs(xRaw[-1] - x_tmp) < outlier_dis and abs(yRaw[-1] - y_tmp) < outlier_dis and abs(zRaw[-1] - z_tmp) < outlier_dis):
 				xRaw.append(x_tmp)
 				yRaw.append(y_tmp)
 				zRaw.append(z_tmp)
@@ -94,7 +97,7 @@ def callback(data, args):
 					
 def movement_detection_node():
 	rospy.init_node("movement_detection_node")
-	global times, x, y, z, t, xRaw, yRaw, zRaw, xV_tmp, yV_tmp, zV_tmp, tV_tmp, movement_recording, movement_start, movement_end, count, invalid_movement, outliers_count, num_points_std, std_threshold, num_outliers
+	global times, x, y, z, t, xRaw, yRaw, zRaw, xV_tmp, yV_tmp, zV_tmp, tV_tmp, outlier_dis, movement_recording, movement_start, movement_end, count, invalid_movement, outliers_count, num_points_std, std_threshold, num_outliers
 	rospy.loginfo("Ready to record NEW movement")
 	
 	smooth_flag = rospy.get_param("movement_detection_node/smooth", False)
@@ -102,6 +105,7 @@ def movement_detection_node():
 	num_points_std = rospy.get_param("movement_detection_node/num_points_std", 24)
 	std_threshold = rospy.get_param("movement_detection_node/std_threshold", 0.01)
 	num_outliers = rospy.get_param("movement_detection_node/num_outliers", 10)
+	outlier_dis = rospy.get_param("movement_detection_node/outlier_dis", 0.1)
 	smooth_service_name = rospy.get_param("movement_detection_node/smooth_service_name", "trajectory_smoothing")
 	filter_service_name = rospy.get_param("movement_detection_node/filter_service_name", "static_points_filtering")
 
@@ -176,7 +180,6 @@ def movement_detection_node():
 				point.point.z = z[i]
 				msg.points.append(point)
 			pub.publish(msg)
-			# msg_flag = True
 			msg.points = []
 			movement_recording = True
 			movement_start = False

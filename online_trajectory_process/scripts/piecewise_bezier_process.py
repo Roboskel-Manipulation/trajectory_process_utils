@@ -18,12 +18,13 @@ count = 0
 start_flag = False
 num_points_std = None
 std_threshold = None
+outlier_dis = None
 pub = None
 
 def callback(data):
 	global count, pub, xV_tmp, yV_tmp, zV_tmp, x, y, z
 	global xFinal, yFinal, zFinal, xRaw, yRaw, zRaw, xMov, yMov, zMov
-	global num_points_std, std_threshold, start_flag
+	global num_points_std, std_threshold, start_flag, outlier_dis
 
 	# Get the RWrist keypoint
 	for i in range(len(data.keypoints)):
@@ -39,7 +40,7 @@ def callback(data):
 
 	# if the motion has not ended, remove outliers and zeros (invalid trajectory points)
 	if x_tmp != 0 and y_tmp != 0 and z_tmp != 0:
-		if len(xRaw) == 0 or (len(xRaw) >= 1 and abs(xRaw[-1] - x_tmp) < 0.1 and abs(yRaw[-1] - y_tmp) < 0.1 and abs(zRaw[-1] - z_tmp) < 0.1):
+		if len(xRaw) == 0 or (len(xRaw) >= 1 and abs(xRaw[-1] - x_tmp) < outlier_dis and abs(yRaw[-1] - y_tmp) < outlier_dis and abs(zRaw[-1] - z_tmp) < outlier_dis):
 			xRaw.append(x_tmp)
 			yRaw.append(y_tmp)
 			zRaw.append(z_tmp)
@@ -105,10 +106,11 @@ def callback(data):
 					
 def movement_detection_node():
 	rospy.init_node("trajectory_process")
-	global pub, num_points_std, std_threshold
+	global pub, num_points_std, std_threshold, outlier_dis
 	rospy.loginfo("Ready to record NEW movement")
 	num_points_std = rospy.get_param('trajectory_process/num_points_std', 25)
 	std_threshold = rospy.get_param('trajectory_process/std_threshold', 0.01)
+	outlier_dis = rospy.get_param("raw_poitns/outlier_dis", 0.1)	
 	pub = rospy.Publisher("trajectory_points", PointStamped, queue_size=10, latch=True)	
 	sub = rospy.Subscriber("transform_topic", Keypoint3d_list, callback)
 	rospy.spin()

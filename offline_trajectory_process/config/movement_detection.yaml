@@ -4,6 +4,9 @@ num_points_std: 24
 # std threshold for detecting the beginning and the end of the motion
 std_threshold: 0.01
 
+# distance along each axis for a point to be considered outlier
+outlier_dis: 0.1
+
 # number of consecutive outliers in order for a movement to be considered invalid
 num_outliers: 10
 

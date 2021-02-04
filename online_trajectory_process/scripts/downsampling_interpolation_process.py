@@ -28,10 +28,11 @@ time_debug = {}
 timestamp = None
 x_init, y_init, z_init = [], [], []
 num_points_std, std_threshold = None, None
+outlier_dis = None
 
 # Interpolate points in the line segment between p1 and p2
 def interpolation(p1, p2, dis, dur):
-	global timestamp, x, y, z, ds_thres, pub, num_points, count_inter
+	global timestamp, x, y, z, ds_thres, pub, num_points, count_inter, outlier_dis
 	num_inter_points = dis//ds_thres
 	pub_rate = dur/(num_inter_points+1)
 	# rospy.loginfo("Num of points %d"%num_inter_points)
@@ -69,7 +70,7 @@ def callback(data):
 			y_tmp = data.keypoints[i].points.point.y
 			z_tmp = data.keypoints[i].points.point.z
 			timestamp = data.keypoints[i].points.header.stamp.to_sec()
-			if len(x_init) >= 1 and abs(x_init[-1]-x_tmp) < 0.1 and abs(y_init[-1]-y_tmp) < 0.1 and abs(z_init[-1]-z_tmp) < 0.1:
+			if len(x_init) >= 1 and abs(x_init[-1]-x_tmp) < outlier_dis and abs(y_init[-1]-y_tmp) < outlier_dis and abs(z_init[-1]-z_tmp) < outlier_dis:
 				x_init.append(x_tmp)
 				y_init.append(y_tmp)
 				z_init.append(z_tmp)
@@ -95,7 +96,7 @@ def callback(data):
 		if not end_flag:
 			# Check for outliers or zeros (invalid trajectory points)
 			if x_tmp != 0 and y_tmp != 0 and z_tmp != 0:
-				if len(xRaw) == 0 or (len(xRaw) >= 1 and abs(xRaw[-1] - x_tmp) < 0.1 and abs(yRaw[-1] - y_tmp) < 0.1 and abs(zRaw[-1] - z_tmp) < 0.1):
+				if len(xRaw) == 0 or (len(xRaw) >= 1 and abs(xRaw[-1] - x_tmp) < outlier_dis and abs(yRaw[-1] - y_tmp) < outlier_dis and abs(zRaw[-1] - z_tmp) < outlier_dis):
 					xRaw.append(x_tmp)
 					yRaw.append(y_tmp)
 					zRaw.append(z_tmp)
@@ -110,7 +111,7 @@ def callback(data):
 						std_x = np.std(xV_tmp)
 						std_y = np.std(yV_tmp)
 						std_z = np.std(zV_tmp)
-						if (not start_flag) and (std_x > 0.01 or std_y > 0.01 or std_z > 0.01):
+						if (not start_flag) and (std_x > std_threshold or std_y > std_threshold or std_z > std_threshold):
 							print("Start movement at sample %d" %count)
 							start_flag = True
 						
@@ -152,10 +153,11 @@ def callback(data):
 									# print (num_points)
 
 def movement_detection_node():
-	global pub, std_threshold, num_points_std
+	global pub, std_threshold, num_points_std, outlier_dis
 	rospy.init_node("movement_detection_downsampling_node")
 	num_points_std = rospy.get_param('trajectory_process/num_points_std', 25)
 	std_threshold = rospy.get_param('trajectory_process/std_threshold', 0.01)
+	outlier_dis = rospy.get_param("raw_poitns/outlier_dis", 0.1)
 
 	pub = rospy.Publisher("trajectory_points", PointStamped, queue_size=10, latch=True)
 	sub = rospy.Subscriber("transform_topic", Keypoint3d_list, callback)

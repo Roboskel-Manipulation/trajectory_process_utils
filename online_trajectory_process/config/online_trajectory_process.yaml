@@ -3,3 +3,6 @@ num_points_std: 25
 
 # std threshold for motion detection
 std_threshold: 0.01
+
+# distance along each axis for a point to be considered outlier
+outlier_dis: 0.1

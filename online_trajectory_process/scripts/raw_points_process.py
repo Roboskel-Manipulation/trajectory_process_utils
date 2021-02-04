@@ -14,10 +14,11 @@ count = 0
 end = False
 num_points_std = 0
 std_threshold = 0
+outlier_dis = None
 
 def callback(msg):
 	global pub, x, y, z, init_flag, x_mov, y_mov, start, end, count, halt_motion
-	global num_points_std, std_threshold	
+	global num_points_std, std_threshold, outlier_dis	
 	count += 1
 	# Get RWrist keypoint
 	for i in range(len(msg.keypoints)):
@@ -27,7 +28,7 @@ def callback(msg):
 			z_point = msg.keypoints[i].points.point.z
 			time_point = msg.keypoints[i].points.header.stamp
 			if len(x) > 1:
-				if abs(x[-1]-x_point) < 0.1 and abs(y[-1]-y_point) < 0.1 and abs(z[-1]-z_point) < 0.1:
+				if abs(x[-1]-x_point) < outlier_dis and abs(y[-1]-y_point) < outlier_dis and abs(z[-1]-z_point) < outlier_dis:
 					x.append(x_point)
 					y.append(y_point)
 					z.append(z_point)
@@ -45,7 +46,7 @@ def callback(msg):
 		else:
 			if x_point == 0.0 and y_point == 0.0 and z_point == 0.0:
 				valid_point = False
-			elif abs(x_mov[-1] - x_point) < 0.1 and abs(y_mov[-1] - y_point) < 0.1 and abs(z_mov[-1] - z_point) < 0.1:
+			elif abs(x_mov[-1] - x_point) < outlier_dis and abs(y_mov[-1] - y_point) < outlier_dis and abs(z_mov[-1] - z_point) < outlier_dis:
 				x_mov.append(x_point)
 				y_mov.append(y_point)
 				z_mov.append(z_point)
@@ -75,12 +76,14 @@ def callback(msg):
 				pub.publish(point)
 
 def main():
-	global pub, num_points_std, std_threshold
+	global pub, num_points_std, std_threshold, outlier_dis
 	rospy.init_node("raw_points")
 	num_points_std = rospy.get_param("raw_points/num_points_std", 25)
 	std_threshold = rospy.get_param("raw_points/std_threshold", 0.01)
+	outlier_dis = rospy.get_param("raw_poitns/outlier_dis", 0.1)
 	sub = rospy.Subscriber("transform_topic", Keypoint3d_list, callback)
 	pub = rospy.Publisher("trajectory_points", PointStamped, queue_size=10, latch=True)
+
 	rospy.spin()
 
 main()
