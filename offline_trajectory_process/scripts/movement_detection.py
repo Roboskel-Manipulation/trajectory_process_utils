@@ -4,7 +4,8 @@ from geometry_msgs.msg import Point
 from geometry_msgs.msg import PointStamped
 from keypoint_3d_matching_msgs.msg import Keypoint3d_list
 from trajectory_custom_msgs.msg import PointStampedArray
-from trajectory_process_utils_srvs.srv import *
+from offline_trajectory_process.srv import *
+from trajectory_smoothing.srv import *
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -47,7 +48,7 @@ def callback(data, args):
 				x_tmp = data.keypoints[i].points.point.x
 				y_tmp = data.keypoints[i].points.point.y
 				z_tmp = data.keypoints[i].points.point.z
-				timestamp = rospy.get_time()
+				timestamp = data.keypoints[i].points.header.stamp.to_sec()
 				count += 1
 				break
 		if x_tmp != 0 and y_tmp != 0 and z_tmp != 0:
@@ -117,20 +118,20 @@ def movement_detection_node():
 	# using a geometry_msgs/Point msg for each point
 	# sub = rospy.Subscriber('raw_points', Point, callback, num_points_std)
 	
-	pub = rospy.Publisher('/trajectory_points', PointStampedArray, queue_size=10)
+	pub = rospy.Publisher('/candidate_points', PointStampedArray, queue_size=10)
 	raw_pub = rospy.Publisher('/raw_movement_points', Point, queue_size=10)
-	x_raw, y_raw, z_raw = [], [], []
+	x_raw, y_raw, z_raw, time_raw = [], [], [], []
 
 	msg = PointStampedArray()
 	while not rospy.is_shutdown():
 		if (not movement_recording and not invalid_movement):
-			rospy.loginfo("Mean value of time steps: %f"%np.mean(times))
 			times = []
 			timenow = None
 			for i in xrange(len(x)):
 				x_raw.append(x[i])
 				y_raw.append(y[i])
 				z_raw.append(z[i])
+				time_raw.append(t[i])
 
 				point = Point()
 				point.x = x[i]
@@ -142,11 +143,12 @@ def movement_detection_node():
 				try:
 					rospy.wait_for_service(filter_service_name)
 					filtering = rospy.ServiceProxy(filter_service_name, Filtering)
-					resp = filtering(x, y, z)
+					resp = filtering(x, y, z, t)
 					x = resp.x
 					y = resp.y
 					z = resp.z
-					# t = resp.t
+					t = resp.t
+
 					rospy.loginfo("Filtered the points")
 				except rospy.ServiceException, e:
 					rospy.logerr("Cleaning service call failed: %s"%e)				
@@ -159,6 +161,7 @@ def movement_detection_node():
 					x = resp.x_smooth
 					y = resp.y_smooth
 					z = resp.z_smooth
+					t = np.linspace(t[0], t[-1], len(x))
 					rospy.loginfo("Smoothed the trajectory")
 				except rospy.ServiceException, e:
 					rospy.logerr("Smoothing service call failed: %s"%e)	
@@ -178,6 +181,7 @@ def movement_detection_node():
 				point.point.x = x[i]
 				point.point.y = y[i]
 				point.point.z = z[i]
+				point.header.stamp = rospy.Time.from_sec(t[i])
 				msg.points.append(point)
 			pub.publish(msg)
 			msg.points = []

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from trajectory_process_utils_srvs.srv import *
+from offline_trajectory_process.srv import *
 from statistics import median
 
 
@@ -14,6 +14,7 @@ def handle_filtering(req):
 	x = req.x
 	y = req.y
 	z = req.z
+	t = req.t
 
 	for i in xrange(num_points_median, len(x)-1):
 		if abs(x[i] - median(x[0:i])) > thresX or abs(y[i] - median(y[0:i])) > thresY or abs(z[i] - median(z[0:i])) > thresZ:
@@ -26,7 +27,8 @@ def handle_filtering(req):
 	x = x[i-3:j+3]
 	y = y[i-3:j+3]
 	z = z[i-3:j+3]
-	return FilteringResponse(x, y, z)
+	t = t[i-3:j+3]
+	return FilteringResponse(x, y, z, t)
 
 
 def static_points_filtering_server():

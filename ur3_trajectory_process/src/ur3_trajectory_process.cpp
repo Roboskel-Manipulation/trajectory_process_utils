@@ -19,7 +19,7 @@ void ee_state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr state_msg
 void trajectory_points_callback(const geometry_msgs::PointStamped::ConstPtr trajectory_point){
 	if (not halt_motion){
 		// If it is the first trajectory point, compute the translation offset
-		if (init_point_flag){
+		if (init_point_flag and dynamic_calibration){
 			xOffset = robot_pose->pose.position.x - trajectory_point->point.x;
 			yOffset = robot_pose->pose.position.y - trajectory_point->point.y;
 			zOffset = robot_pose->pose.position.z - trajectory_point->point.z;
@@ -27,10 +27,16 @@ void trajectory_points_callback(const geometry_msgs::PointStamped::ConstPtr traj
 			init_point_flag = false;
 		}
 		else{
-			candidate_point->x = trajectory_point->point.x + xOffset;
-			candidate_point->y = trajectory_point->point.y + yOffset;
-			candidate_point->z = trajectory_point->point.z + zOffset;
-			
+			if (dynamic_calibration){
+				candidate_point->x = trajectory_point->point.x + xOffset;
+				candidate_point->y = trajectory_point->point.y + yOffset;
+				candidate_point->z = trajectory_point->point.z + zOffset;
+			}
+			else{
+				candidate_point->x = trajectory_point->point.x;
+				candidate_point->y = trajectory_point->point.y;
+				candidate_point->z = trajectory_point->point.z;				
+			}
 			// The trajectory point if valid if it doed not lead the robot
 			// to self-collision or overextension
 			if (check_robot_limits(candidate_point)){
@@ -52,7 +58,7 @@ int main(int argc, char** argv){
 	ros::NodeHandle nh;
 
 	// ee state topic
-	nh.param("reactive_control_node/state_topic", ee_state_topic, std::string("ur3_cartesian_velocity_controller/ee_state"));
+	nh.param("cartesian_trajectory_tracking/state_topic", ee_state_topic, std::string("ur3_cartesian_velocity_controller/ee_state"));
 
 	// Self collision limits
 	nh.param("ur3_trajectory_process_node/self_collision_limit", self_collision_limit, 0.0f);
@@ -63,6 +69,9 @@ int main(int argc, char** argv){
 
 	// Number of points to consider for recalibration
 	nh.param("ur3_trajectory_process_node/new_offset_points", new_offset_points, 25);
+
+	// static calibration
+	nh.param("ur3_trajectory_process_node/dynamic_calibration", dynamic_calibration, false);
 
 	// Control points publisher
 	control_points_pub = nh.advertise<geometry_msgs::PointStamped>("/control_points_topic", 100);
