@@ -21,7 +21,7 @@ def handle_smoothing(req):
 		b = (x_1[i],y_1[i],z_1[i])
 		dst = distance.euclidean(a, b)
 		
-		if dst > 0.012:
+		if dst > 0.002:
 			x_smooth.append(x_1[i])
 			y_smooth.append(y_1[i])
 			z_smooth.append(z_1[i])
@@ -31,7 +31,6 @@ def handle_smoothing(req):
 	# x_smooth, y_smooth, z_smooth = x_1, y_1, z_1
 	# functions.print2D([x,y,z],[x_smooth,y_smooth,z_smooth])
 	# functions.print3D([x,y,z],[x_smooth,y_smooth,z_smooth])
-
 	return SmoothingResponse(x_smooth,y_smooth, z_smooth, x_smooth_all, y_smooth_all, z_smooth_all)
 
 

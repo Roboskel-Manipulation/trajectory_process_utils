@@ -43,6 +43,7 @@ void trajectory_points_callback(const geometry_msgs::PointStamped::ConstPtr traj
 				control_point->point.x = candidate_point->x;
 				control_point->point.y = candidate_point->y;
 				control_point->point.z = candidate_point->z;
+				control_point->header.stamp = trajectory_point->header.stamp;
 				control_points_pub.publish(*control_point);
 			}
 		}
