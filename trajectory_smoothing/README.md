@@ -1,4 +1,4 @@
-# The trajectory smoothing package
+# trajectory_smoothing
 A ROS package for smoothing trajectories resulting from dynamic movements (e.g. dynamic movements)
 
 ## Description
