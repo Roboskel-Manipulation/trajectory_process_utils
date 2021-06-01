@@ -1,4 +1,4 @@
-# The online trajectory process package
+# online_trajectory_process
 A ROS package for human movement onset detection and optionally smoothing of the ongoing movement. 
 
 ## Description
