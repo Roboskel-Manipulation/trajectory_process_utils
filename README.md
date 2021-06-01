@@ -1,4 +1,4 @@
-# The trajectory process utils ROS package
+# trajectory_process_utils
 
 This package offres several utilities for processing 3D cartesian trajectories
 
