@@ -24,4 +24,3 @@ To check the functionality real-time:
 
 * The arguments of the `movement_detection.launch` file are the following:
 	* smooth: True if you want to smooth the trajectory (default false)
-	* clean: True if you want to remove redundant points (default true)
