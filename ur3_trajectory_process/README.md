@@ -1,4 +1,4 @@
-# The ur3 trajectory process package
+# ur3_trajectory_process
 A ROS package for processing a 3D cartesian trajectory to be executable by a UR3 Cobot.
 
 ## Description:
