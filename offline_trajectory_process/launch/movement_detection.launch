@@ -1,15 +1,13 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="filter" default="false"/>
 	<arg name="smooth" default="false"/>
 
 	<node name="movement_detection_node" type="movement_detection.py" pkg="offline_trajectory_process" output="screen" respawn="false">
 		<param name="smooth" value="$(arg smooth)"/>
-		<param name="filter" value="$(arg filter)"/>
 		<rosparam file="$(find offline_trajectory_process)/config/movement_detection.yaml" command="load"/>
 	</node>
 
-	<include file="$(find offline_trajectory_process)/launch/static_point_filtering.launch" if="$(arg filter)">
+	<include file="$(find offline_trajectory_process)/launch/static_point_filtering.launch">
 	</include>
 
 	<include file="$(find trajectory_smoothing)/launch/trajectory_smoothing.launch" if="$(arg smooth)">

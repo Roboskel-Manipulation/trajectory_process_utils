@@ -124,7 +124,6 @@ def movement_detection_node():
 	rospy.loginfo("Ready to record NEW movement")
 	
 	smooth_flag = rospy.get_param("movement_detection_node/smooth", False)
-	filter_flag = rospy.get_param("movement_detection_node/filter", False)
 	num_points_std = rospy.get_param("movement_detection_node/num_points_std", 24)
 	std_threshold = rospy.get_param("movement_detection_node/std_threshold", 0.01)
 	num_outliers = rospy.get_param("movement_detection_node/num_outliers", 10)
@@ -179,7 +178,7 @@ def movement_detection_node():
 	# sub = rospy.Subscriber('raw_points', Point, callback, num_points_std)
 	
 	pub = rospy.Publisher('/candidate_points', PointStampedArray, queue_size=10)
-	vis_human_pub = rospy.Publisher('/vis_human_topic', Marker, queue_size=10)
+	vis_human_pub = rospy.Publisher('/vis_human', Marker, queue_size=10)
 	vis_bezier_pub = rospy.Publisher('/vis_bezier_topic', Marker, queue_size=10)
 	raw_pub = rospy.Publisher('/raw_movement_points', PointStampedArray, queue_size=10)
 	x_raw, y_raw, z_raw, time_raw = [], [], [], []
@@ -194,19 +193,18 @@ def movement_detection_node():
 				y_raw.append(y[i])
 				z_raw.append(z[i])
 				time_raw.append(t[i])
-			if filter_flag:
-				try:
-					rospy.wait_for_service(filter_service_name)
-					filtering = rospy.ServiceProxy(filter_service_name, Filtering)
-					resp = filtering(x, y, z, t)
-					x = resp.x
-					y = resp.y
-					z = resp.z
-					t = resp.t
+			try:
+				rospy.wait_for_service(filter_service_name)
+				filtering = rospy.ServiceProxy(filter_service_name, Filtering)
+				resp = filtering(x, y, z, t)
+				x = resp.x
+				y = resp.y
+				z = resp.z
+				t = resp.t
 
-					rospy.loginfo("Filtered the points")
-				except rospy.ServiceException, e:
-					rospy.logerr("Cleaning service call failed: %s"%e)				
+				rospy.loginfo("Filtered the points")
+			except rospy.ServiceException, e:
+				rospy.logerr("Cleaning service call failed: %s"%e)				
 
 			# for i in xrange(len(x)):
 			# 	point = PointStamped()
@@ -240,15 +238,15 @@ def movement_detection_node():
 					rospy.logerr("Smoothing service call failed: %s"%e)	
 				
 			rospy.loginfo('Bezier time duration: %f secs'%(rospy.Time.now().to_sec() - start_time))
-			# fig = plt.figure()
-			# ax = plt.axes()
-			# ax.scatter(x_raw, y_raw, c='blue', s=20)			
-			# ax.scatter(x, y, c='orange', s=20, label=len(x))
-			# ax.set_xlabel('x(m)')
-			# ax.set_ylabel('y(m)')
-			# ax.grid()
-			# ax.legend()
-			# plt.show()
+			fig = plt.figure()
+			ax = plt.axes()
+			ax.scatter(x_raw, y_raw, c='blue', s=20)			
+			ax.scatter(x, y, c='orange', s=20, label=len(x))
+			ax.set_xlabel('x(m)')
+			ax.set_ylabel('y(m)')
+			ax.grid()
+			ax.legend()
+			plt.show()
 			x_raw, y_raw, z_raw = [], [], []
 
 			for i in xrange(len(x)):
