@@ -1,6 +1,6 @@
 # trajectory_process_utils
 
-This package offres several utilities for processing 3D cartesian trajectories
+This package offers several utilities for processing 3D cartesian trajectories.
 
 ## Description
 * <b> offline_trajectory_process:</b> A ROS package for detecting the onset and end of a human movement. Optionally, filtering of static points at the beginning and end of the trajectory and smoothing of the entire movement is also available.
